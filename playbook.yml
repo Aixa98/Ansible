@@ -1,0 +1,18 @@
+- hosts: localhost
+  become: yes
+  tasks:
+   - name: Extraer info de sistemas de archivos #variables
+     set_fact:
+       fs_item: "{{ item.device }};{{ item.mount }};{{ item.fstype }};{{ item.size_total }};{{ item.size_available }}" #permite registrar sólo la información quedeseamos obtener
+     with_items: #bucle
+      - "{{ ansible_mounts }}"
+     no_log: True
+     register: fs_result
+
+   - name: Crear una lista de sistemas de archivos por host #salida de todoslos filesystem recolectados
+     set_fact:
+       fs: "{{ fs_result.results | map(attribute='ansible_facts.fs_item') | list}}"
+     no_log: True
+   - name: Mostrar los resultados #usa no_log
+  debug: msg="{{ fs }}"
+#Playbook para extraer informacion de discos y sistemas de archivos
